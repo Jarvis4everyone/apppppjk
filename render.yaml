@@ -1,0 +1,85 @@
+services:
+  - type: web
+    name: axzora-chat-backend
+    env: docker
+    # Dockerfile is now in root, so no path needed
+    # dockerfilePath: Dockerfile
+    # dockerContext: .
+    plan: starter
+    region: oregon
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: CORS_ORIGIN
+        value: *
+      # JWT Configuration - Set these in Render Dashboard
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 30d
+      # PostgreSQL - Use Render PostgreSQL service
+      - key: POSTGRES_HOST
+        fromDatabase:
+          name: axzora-postgres
+          property: host
+      - key: POSTGRES_PORT
+        fromDatabase:
+          name: axzora-postgres
+          property: port
+      - key: POSTGRES_DB
+        fromDatabase:
+          name: axzora-postgres
+          property: database
+      - key: POSTGRES_USER
+        fromDatabase:
+          name: axzora-postgres
+          property: user
+      - key: POSTGRES_PASSWORD
+        fromDatabase:
+          name: axzora-postgres
+          property: password
+      - key: POSTGRES_SSL
+        value: true
+      # MongoDB - Use MongoDB Atlas or Render MongoDB
+      - key: MONGO_URI
+        sync: false
+      # Redis - Use Render Redis service
+      - key: REDIS_URL
+        fromService:
+          name: axzora-redis
+          type: redis
+          property: connectionString
+      # Agora Configuration
+      - key: AGORA_APP_ID
+        sync: false
+      - key: AGORA_APP_CERTIFICATE
+        sync: false
+      # File Upload
+      - key: MAX_FILE_SIZE
+        value: 10485760
+      - key: UPLOAD_PATH
+        value: ./uploads
+      - key: ALLOWED_FILE_TYPES
+        value: jpg,jpeg,png,gif,pdf,doc,docx,mp4,mp3
+      # Rate Limiting
+      - key: RATE_LIMIT_WINDOW_MS
+        value: 900000
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: 100
+
+databases:
+  - name: axzora-postgres
+    plan: starter
+    databaseName: axzora_chat
+    user: axzora_user
+
+  - name: axzora-redis
+    plan: starter
+    maxmemoryPolicy: allkeys-lru
+
